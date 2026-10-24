@@ -193,5 +193,4 @@ jobs:
         with:
           package-name: yarilo-autoconfig
           package-type: container
-          min-versions-to-keep: 10
-          delete-only-untagged-versions: true
+          min-versions-to-keep: 3

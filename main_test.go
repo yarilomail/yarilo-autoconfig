@@ -222,3 +222,23 @@ func TestOpsHandler(t *testing.T) {
 		t.Errorf("/metrics lacks the request counter:\n%s", rec.Body.String())
 	}
 }
+
+func TestNoSniff(t *testing.T) {
+	c := testConfig()
+	c.DAVURL = "https://dav.example.net/dav/"
+	s := newTestServer(t, c)
+	tests := []struct{ method, target, body string }{
+		{http.MethodGet, "/mail/config-v1.1.xml", ""},
+		{http.MethodGet, "/mail/config-v1.1.xml?emailaddress=bad", ""},
+		{http.MethodPost, "/autodiscover/autodiscover.xml", poxBody("alice@customer.example", nsOutlook)},
+		{http.MethodGet, "/autodiscover/autodiscover.xml", ""},
+		{http.MethodGet, "/.well-known/caldav", ""},
+		{http.MethodGet, "/nowhere", ""},
+	}
+	for _, tt := range tests {
+		rec := do(s, tt.method, tt.target, tt.body)
+		if got := rec.Header().Get("X-Content-Type-Options"); got != "nosniff" {
+			t.Errorf("%s %s: X-Content-Type-Options = %q", tt.method, tt.target, got)
+		}
+	}
+}

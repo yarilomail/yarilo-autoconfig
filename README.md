@@ -1,7 +1,19 @@
 # yarilo-autoconfig
 
-Mail client autoconfiguration for yarilo. The service tells a mail client
-which hosts and ports to use for an address:
+<table><tr>
+<td><img src="https://raw.githubusercontent.com/yarilomail/yarilo/main/docs/icon.svg" width="180" alt="yarilo logo"/></td>
+<td>
+
+Mail client autoconfiguration for [yarilo](https://github.com/yarilomail/yarilo): Thunderbird autoconfig and Outlook Autodiscover, written in Go.
+
+**Website:** [yarilomail.org](https://yarilomail.org) · **Docs:** [doc.yarilomail.org](https://doc.yarilomail.org/latest/installation/autoconfig.html)
+
+</td>
+</tr></table>
+
+[![CI](https://github.com/yarilomail/yarilo-autoconfig/actions/workflows/ci.yml/badge.svg)](https://github.com/yarilomail/yarilo-autoconfig/actions/workflows/ci.yml) [![Trivy](https://github.com/yarilomail/yarilo-autoconfig/actions/workflows/trivy.yml/badge.svg)](https://github.com/yarilomail/yarilo-autoconfig/actions/workflows/trivy.yml) [![Go 1.26](https://img.shields.io/badge/Go-1.26-00ADD8?logo=go&logoColor=white)](https://go.dev/) [![Docker Hub](https://img.shields.io/badge/docker.io-0kaba0%2Fyarilo--autoconfig-blue?logo=docker)](https://hub.docker.com/r/0kaba0/yarilo-autoconfig) [![License: AGPL v3](https://img.shields.io/badge/license-AGPLv3-blue.svg)](LICENSE)
+
+The service tells a mail client which hosts and ports to use for an address:
 
 - **Thunderbird** (desktop and Android), FairEmail: autoconfig XML, format 1.1;
 - **Outlook** (classic, Windows): POX Autodiscover.
@@ -25,6 +37,8 @@ enumerate mailboxes.
 The `.well-known` redirects are a convenience for a user who types the
 autoconfig host into a DAV or JMAP client. RFC 6764 and RFC 8620 discovery is
 answered by the DAV and JMAP services on their own hosts.
+
+Every answer carries `X-Content-Type-Options: nosniff`.
 
 Health and metrics are on the metrics port, which the ingress does not expose:
 `/healthz`, `/readyz`, `/metrics`.
@@ -64,7 +78,7 @@ its numbers equal the defaults above, and a test keeps them equal.
 
 | Value | Default | Meaning |
 |:---|:---|:---|
-| `image.repository` | `ghcr.io/yarilomail/yarilo-autoconfig` | |
+| `image.repository` | `docker.io/0kaba0/yarilo-autoconfig` | |
 | `image.tag` | empty | empty = the chart's `appVersion` |
 | `imagePullSecrets` | `[]` | for a private registry mirror |
 | `replicaCount` | `2` | |
@@ -124,8 +138,9 @@ equal to it. A merge to `main` with a new value builds the image tagged
 Every build on `main` also pushes `latest` and the short commit SHA.
 
 The image is published to two registries with the same tags:
-`ghcr.io/yarilomail/yarilo-autoconfig` (the chart's default) and
-`docker.io/0kaba0/yarilo-autoconfig`.
+`docker.io/0kaba0/yarilo-autoconfig` (the chart's default) and
+`ghcr.io/yarilomail/yarilo-autoconfig`, which keeps only the three newest
+versions.
 
 ## License
 

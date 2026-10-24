@@ -46,6 +46,8 @@ func newServer(cfg Config, reg prometheus.Registerer) *server {
 // ServeHTTP routes by lower-cased path: Outlook sends both
 // /autodiscover/autodiscover.xml and /Autodiscover/Autodiscover.xml.
 func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// A browser must never sniff an XML answer into HTML.
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 	switch strings.ToLower(r.URL.Path) {
 	case "/mail/config-v1.1.xml", "/.well-known/autoconfig/mail/config-v1.1.xml":
 		s.handleAutoconfig(w, r)
