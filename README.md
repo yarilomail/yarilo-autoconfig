@@ -83,8 +83,7 @@ its numbers equal the defaults above, and a test keeps them equal.
 helm upgrade --install yarilo-autoconfig ./helm -n mail \
   --set config.imap_host=imap.example.net \
   --set config.smtp_host=smtp.example.net \
-  --set ingress.enabled=true --set ingress.tlsSecretName=autoconfig-tls \
-  --set 'imagePullSecrets[0].name=ghcr-pull'
+  --set ingress.enabled=true --set ingress.tlsSecretName=autoconfig-tls
 ```
 
 ## Host names and DNS
