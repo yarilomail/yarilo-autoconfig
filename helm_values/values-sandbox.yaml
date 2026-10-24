@@ -12,6 +12,8 @@ ingress:
   className: nginx
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/limit-rps: "5"
+    nginx.ingress.kubernetes.io/limit-connections: "10"
   hosts:
     - autoconfig.sb.seconddns.com
     - autodiscover.sb.seconddns.com
