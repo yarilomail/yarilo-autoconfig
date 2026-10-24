@@ -4,7 +4,7 @@ image:
   tag: ""
   pullPolicy: IfNotPresent
 
-# The GHCR package is private; name a docker-registry Secret here.
+# A docker-registry Secret for a private registry mirror.
 imagePullSecrets: []
 
 replicaCount: 2
