@@ -64,7 +64,7 @@ its numbers equal the defaults above, and a test keeps them equal.
 
 | Value | Default | Meaning |
 |:---|:---|:---|
-| `image.repository` | `ghcr.io/yarilomail/yarilo-autoconfig` | |
+| `image.repository` | `docker.io/0kaba0/yarilo-autoconfig` | |
 | `image.tag` | empty | empty = the chart's `appVersion` |
 | `imagePullSecrets` | `[]` | for a private registry mirror |
 | `replicaCount` | `2` | |
@@ -124,8 +124,9 @@ equal to it. A merge to `main` with a new value builds the image tagged
 Every build on `main` also pushes `latest` and the short commit SHA.
 
 The image is published to two registries with the same tags:
-`ghcr.io/yarilomail/yarilo-autoconfig` (the chart's default) and
-`docker.io/0kaba0/yarilo-autoconfig`.
+`docker.io/0kaba0/yarilo-autoconfig` (the chart's default) and
+`ghcr.io/yarilomail/yarilo-autoconfig`, which keeps only the three newest
+versions.
 
 ## License
 
