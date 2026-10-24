@@ -1,0 +1,18 @@
+image:
+  tag: "0.1.2"
+
+config:
+  display_name: "Yarilo Sandbox"
+  imap_host: mail-sb.seconddns.com
+  smtp_host: mail-sb.seconddns.com
+  smtp_implicit_tls_port: 0     # the sandbox submission listens on 587 only
+
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  hosts:
+    - autoconfig.sb.seconddns.com
+    - autodiscover.sb.seconddns.com
+  tlsSecretName: yarilo-autoconfig-tls
