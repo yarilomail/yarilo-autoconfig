@@ -38,6 +38,8 @@ The `.well-known` redirects are a convenience for a user who types the
 autoconfig host into a DAV or JMAP client. RFC 6764 and RFC 8620 discovery is
 answered by the DAV and JMAP services on their own hosts.
 
+Every answer carries `X-Content-Type-Options: nosniff`.
+
 Health and metrics are on the metrics port, which the ingress does not expose:
 `/healthz`, `/readyz`, `/metrics`.
 
