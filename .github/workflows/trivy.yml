@@ -9,6 +9,7 @@ on:
       - "go.mod"
       - "go.sum"
       - "Dockerfile"
+      - ".github/workflows/trivy.yml"
   schedule:
     - cron: "0 6 * * 1"  # every Monday at 06:00 UTC
   workflow_dispatch:
@@ -63,7 +64,7 @@ jobs:
           format: sarif
           output: trivy-fs.sarif
           severity: CRITICAL,HIGH
-          exit-code: "0"
+          exit-code: "1"
 
       - name: Upload filesystem scan results
         uses: github/codeql-action/upload-sarif@v4
