@@ -12,7 +12,10 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
     -ldflags="-s -w -X main.version=${BUILD_VERSION}" -trimpath \
     -o /out/yarilo-autoconfig .
 
-FROM gcr.io/distroless/static-debian13:nonroot
+FROM alpine:3.24
+# Upgrade at build time so a rebuild picks up fixed packages under the same tag.
+# hadolint ignore=DL3018,DL3019
+RUN apk upgrade --no-cache && adduser -D -H -u 65532 autoconfig
 COPY --from=builder /out/yarilo-autoconfig /usr/local/bin/yarilo-autoconfig
 USER 65532:65532
 EXPOSE 8080/tcp 8081/tcp
