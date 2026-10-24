@@ -123,6 +123,10 @@ equal to it. A merge to `main` with a new value builds the image tagged
 `<version>` (no `v`), creates the git tag `v<version>` and a GitHub release.
 Every build on `main` also pushes `latest` and the short commit SHA.
 
+The image is published to two registries with the same tags:
+`ghcr.io/yarilomail/yarilo-autoconfig` (the chart's default) and
+`docker.io/0kaba0/yarilo-autoconfig`.
+
 ## License
 
 GNU AGPLv3, see [LICENSE](LICENSE).
