@@ -1,0 +1,5 @@
+.git
+.github
+helm
+testdata
+*_test.go

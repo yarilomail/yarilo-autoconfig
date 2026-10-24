@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Autodiscover xmlns="http://schemas.microsoft.com/exchange/autodiscover/responseschema/2006">
+  <Response xmlns="http://schemas.microsoft.com/exchange/autodiscover/outlook/responseschema/2006a">
+    <User>
+      <DisplayName>Example Mail</DisplayName>
+    </User>
+    <Account>
+      <AccountType>email</AccountType>
+      <Action>settings</Action>
+      <Protocol>
+        <Type>IMAP</Type>
+        <Server>imap.example.net</Server>
+        <Port>993</Port>
+        <DomainRequired>off</DomainRequired>
+        <LoginName>bob@customer.example</LoginName>
+        <SPA>off</SPA>
+        <SSL>on</SSL>
+        <Encryption>SSL</Encryption>
+        <AuthRequired>on</AuthRequired>
+      </Protocol>
+      <Protocol>
+        <Type>POP3</Type>
+        <Server>pop.example.net</Server>
+        <Port>995</Port>
+        <DomainRequired>off</DomainRequired>
+        <LoginName>bob@customer.example</LoginName>
+        <SPA>off</SPA>
+        <SSL>on</SSL>
+        <Encryption>SSL</Encryption>
+        <AuthRequired>on</AuthRequired>
+      </Protocol>
+      <Protocol>
+        <Type>SMTP</Type>
+        <Server>smtp.example.net</Server>
+        <Port>587</Port>
+        <DomainRequired>off</DomainRequired>
+        <LoginName>bob@customer.example</LoginName>
+        <SPA>off</SPA>
+        <SSL>on</SSL>
+        <Encryption>TLS</Encryption>
+        <AuthRequired>on</AuthRequired>
+      </Protocol>
+    </Account>
+  </Response>
+</Autodiscover>

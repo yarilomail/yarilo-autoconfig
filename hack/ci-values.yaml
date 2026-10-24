@@ -1,0 +1,6 @@
+config:
+  imap_host: imap.example.net
+  smtp_host: smtp.example.net
+ingress:
+  enabled: true
+  tlsSecretName: autoconfig-tls

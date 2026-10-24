@@ -1,0 +1,60 @@
+image:
+  repository: ghcr.io/yarilomail/yarilo-autoconfig
+  # Empty: the chart's appVersion.
+  tag: ""
+  pullPolicy: IfNotPresent
+
+# The GHCR package is private; name a docker-registry Secret here.
+imagePullSecrets: []
+
+replicaCount: 2
+
+# Rendered 1:1 into environment variables (key upper-cased). The numbers
+# equal Defaults() in config.go.
+config:
+  display_name: "Mail"
+  imap_host: ""                 # required
+  imap_port: 993
+  smtp_host: ""                 # required
+  smtp_implicit_tls_port: 465   # 0 = not offered
+  smtp_starttls_port: 587       # 0 = not offered
+  pop3_host: ""                 # empty = POP3 not offered
+  pop3_port: 995
+  dav_url: ""                   # empty: /.well-known/caldav|carddav answer 404
+  jmap_url: ""                  # empty: /.well-known/jmap answers 404
+
+# "debug" logs each answered request with its domain.
+logLevel: ""
+
+httpPort: 8080
+metricsPort: 8081
+
+service:
+  port: 80
+
+# The autoconfig host must be autoconfig.<the part of the MX host after its
+# first label>; Thunderbird finds the service through the MX record.
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - autoconfig.example.net
+    - autodiscover.example.net
+  tlsSecretName: ""
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+resources:
+  requests:
+    cpu: 10m
+    memory: 32Mi
+  limits:
+    cpu: 200m
+    memory: 64Mi
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
