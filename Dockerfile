@@ -1,5 +1,5 @@
 # Pinned to the patch go.mod names; dependabot moves both.
-FROM golang:1.26.10-alpine AS builder
+FROM golang:1.27.2-alpine AS builder
 
 # A newer go.mod must fail the build, not fetch a toolchain.
 ENV GOTOOLCHAIN=local
