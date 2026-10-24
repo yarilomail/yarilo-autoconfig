@@ -13,15 +13,15 @@
     </incomingServer>
     <outgoingServer type="smtp">
       <hostname>smtp.example.net</hostname>
-      <port>465</port>
-      <socketType>SSL</socketType>
+      <port>587</port>
+      <socketType>STARTTLS</socketType>
       <authentication>password-cleartext</authentication>
       <username>%EMAILADDRESS%</username>
     </outgoingServer>
     <outgoingServer type="smtp">
       <hostname>smtp.example.net</hostname>
-      <port>587</port>
-      <socketType>STARTTLS</socketType>
+      <port>465</port>
+      <socketType>SSL</socketType>
       <authentication>password-cleartext</authentication>
       <username>%EMAILADDRESS%</username>
     </outgoingServer>

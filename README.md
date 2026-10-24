@@ -51,8 +51,9 @@ Environment variables. An empty variable keeps its default.
 
 An invalid value stops the service at start with every problem listed.
 
-Outlook takes one SMTP entry: implicit TLS when it is on, otherwise STARTTLS.
-Thunderbird gets both.
+SMTP STARTTLS comes first. Thunderbird gets both entries, STARTTLS before
+implicit TLS; Outlook takes one entry: STARTTLS when it is on, otherwise
+implicit TLS.
 
 ## Helm chart
 

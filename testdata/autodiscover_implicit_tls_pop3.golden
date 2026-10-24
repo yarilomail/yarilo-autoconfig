@@ -32,12 +32,12 @@
       <Protocol>
         <Type>SMTP</Type>
         <Server>smtp.example.net</Server>
-        <Port>587</Port>
+        <Port>465</Port>
         <DomainRequired>off</DomainRequired>
         <LoginName>bob@customer.example</LoginName>
         <SPA>off</SPA>
         <SSL>on</SSL>
-        <Encryption>TLS</Encryption>
+        <Encryption>SSL</Encryption>
         <AuthRequired>on</AuthRequired>
       </Protocol>
     </Account>

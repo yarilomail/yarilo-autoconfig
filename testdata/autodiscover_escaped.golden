@@ -21,12 +21,12 @@
       <Protocol>
         <Type>SMTP</Type>
         <Server>smtp.example.net</Server>
-        <Port>465</Port>
+        <Port>587</Port>
         <DomainRequired>off</DomainRequired>
         <LoginName>o&#39;brien&amp;co@customer.example</LoginName>
         <SPA>off</SPA>
         <SSL>on</SSL>
-        <Encryption>SSL</Encryption>
+        <Encryption>TLS</Encryption>
         <AuthRequired>on</AuthRequired>
       </Protocol>
     </Account>

@@ -83,11 +83,11 @@ func buildPOXSettings(c Config, addr string) poxResponse {
 	if c.POP3Host != "" {
 		ps = append(ps, proto("POP3", c.POP3Host, c.POP3Port, "SSL"))
 	}
-	// Outlook takes one SMTP block; implicit TLS wins when both are on.
-	if c.SMTPImplicitTLSPort != 0 {
-		ps = append(ps, proto("SMTP", c.SMTPHost, c.SMTPImplicitTLSPort, "SSL"))
-	} else {
+	// Outlook takes one SMTP block; STARTTLS wins when both are on.
+	if c.SMTPStartTLSPort != 0 {
 		ps = append(ps, proto("SMTP", c.SMTPHost, c.SMTPStartTLSPort, "TLS"))
+	} else {
+		ps = append(ps, proto("SMTP", c.SMTPHost, c.SMTPImplicitTLSPort, "SSL"))
 	}
 	return poxResponse{NS: nsResponse, Response: poxSettings{
 		NS:          nsOutlook,

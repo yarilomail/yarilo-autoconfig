@@ -58,11 +58,12 @@ func buildClientConfig(c Config, domain string) clientConfig {
 	if c.POP3Host != "" {
 		p.Incoming = append(p.Incoming, server("pop3", c.POP3Host, c.POP3Port, "SSL"))
 	}
-	if c.SMTPImplicitTLSPort != 0 {
-		p.Outgoing = append(p.Outgoing, server("smtp", c.SMTPHost, c.SMTPImplicitTLSPort, "SSL"))
-	}
+	// Listed in order of preference: STARTTLS, then implicit TLS.
 	if c.SMTPStartTLSPort != 0 {
 		p.Outgoing = append(p.Outgoing, server("smtp", c.SMTPHost, c.SMTPStartTLSPort, "STARTTLS"))
+	}
+	if c.SMTPImplicitTLSPort != 0 {
+		p.Outgoing = append(p.Outgoing, server("smtp", c.SMTPHost, c.SMTPImplicitTLSPort, "SSL"))
 	}
 	return clientConfig{Version: "1.1", Provider: p}
 }
