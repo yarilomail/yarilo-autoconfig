@@ -1,0 +1,6 @@
+apiVersion: v2
+name: yarilo-autoconfig
+description: Mail client autoconfiguration for yarilo (Thunderbird autoconfig, Outlook Autodiscover)
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

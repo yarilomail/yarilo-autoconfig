@@ -1,0 +1,179 @@
+name: CI — yarilo-autoconfig
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+# PR pushes supersede each other; runs on main always complete.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  IMAGE: ghcr.io/${{ github.repository_owner }}/yarilo-autoconfig
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+  GOTOOLCHAIN: local
+
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - uses: actions/setup-go@v7.0.0
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+
+      - name: Cache golangci-lint
+        id: lint-cache
+        uses: actions/cache@v6
+        with:
+          path: ~/go/bin/golangci-lint
+          key: golangci-lint-v1.64.8-go1.26.10-${{ runner.os }}
+
+      - name: Install golangci-lint
+        if: steps.lint-cache.outputs.cache-hit != 'true'
+        run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.64.8
+
+      - name: Add GOPATH bin to PATH
+        run: echo "$(go env GOPATH)/bin" >> "$GITHUB_PATH"
+
+      - name: Run golangci-lint
+        run: golangci-lint run ./...
+
+      - name: Hadolint
+        uses: hadolint/hadolint-action@v3.5.0
+        with:
+          dockerfile: Dockerfile
+
+      - uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5
+        with:
+          version: v3.19.0
+
+      - name: Helm lint and render
+        run: |
+          helm lint helm -f hack/ci-values.yaml
+          helm template ci helm -f hack/ci-values.yaml > /dev/null
+          # The two required hosts must stop a render without them.
+          ! helm template ci helm > /dev/null 2>&1
+
+  test:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - uses: actions/setup-go@v7.0.0
+        with:
+          go-version-file: go.mod
+          cache-dependency-path: go.sum
+
+      - name: Run tests
+        run: go test -race -count=1 ./...
+
+  build:
+    needs: [lint, test]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    concurrency:
+      group: build-main
+      cancel-in-progress: false
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+
+      # helm/Chart.yaml appVersion is the release trigger: a new value gets a
+      # git tag v<version>, a release and an image tag <version> (no "v").
+      - name: Determine release version
+        id: version
+        run: |
+          APP_VERSION=$(awk '/^appVersion:/{gsub(/"/, ""); print $2}' helm/Chart.yaml)
+          CHART_VERSION=$(awk '/^version:/{print $2}' helm/Chart.yaml)
+          if [ "$APP_VERSION" != "$CHART_VERSION" ]; then
+            echo "Chart version $CHART_VERSION != appVersion $APP_VERSION" >&2
+            exit 1
+          fi
+          RELEASE_TAG="v${APP_VERSION}"
+          if git ls-remote --tags origin "refs/tags/${RELEASE_TAG}" | grep -q "${RELEASE_TAG}"; then
+            IS_RELEASE=false
+          else
+            IS_RELEASE=true
+          fi
+          echo "tag=${RELEASE_TAG}" >> "$GITHUB_OUTPUT"
+          echo "image_tag=${APP_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "is_release=${IS_RELEASE}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4.4.1
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v6.2.0
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=sha,prefix=,format=short
+            type=raw,value=latest
+            type=raw,value=${{ steps.version.outputs.image_tag }},enable=${{ steps.version.outputs.is_release == 'true' }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v7.4.0
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          platforms: linux/amd64
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          build-args: |
+            BUILD_VERSION=${{ steps.version.outputs.image_tag }}
+
+      - name: Generate release notes
+        if: steps.version.outputs.is_release == 'true'
+        uses: orhun/git-cliff-action@v4
+        with:
+          config: cliff.toml
+          args: --unreleased --strip header
+        env:
+          OUTPUT: RELEASE_NOTES.md
+
+      # The release API creates the tag: GITHUB_TOKEN may not push a ref whose
+      # range touches .github/workflows.
+      - name: Create GitHub release
+        if: steps.version.outputs.is_release == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${{ steps.version.outputs.tag }}" \
+            --target "${{ github.sha }}" \
+            --title "${{ steps.version.outputs.tag }}" \
+            --notes-file RELEASE_NOTES.md
+
+      - name: Cleanup old GHCR versions
+        uses: actions/delete-package-versions@v5
+        with:
+          package-name: yarilo-autoconfig
+          package-type: container
+          min-versions-to-keep: 10
+          delete-only-untagged-versions: true
