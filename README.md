@@ -1,7 +1,19 @@
 # yarilo-autoconfig
 
-Mail client autoconfiguration for yarilo. The service tells a mail client
-which hosts and ports to use for an address:
+<table><tr>
+<td><img src="https://raw.githubusercontent.com/yarilomail/yarilo/main/docs/icon.svg" width="180" alt="yarilo logo"/></td>
+<td>
+
+Mail client autoconfiguration for [yarilo](https://github.com/yarilomail/yarilo): Thunderbird autoconfig and Outlook Autodiscover, written in Go.
+
+**Website:** [yarilomail.org](https://yarilomail.org) · **Docs:** [doc.yarilomail.org](https://doc.yarilomail.org/latest/installation/autoconfig.html)
+
+</td>
+</tr></table>
+
+[![CI](https://github.com/yarilomail/yarilo-autoconfig/actions/workflows/ci.yml/badge.svg)](https://github.com/yarilomail/yarilo-autoconfig/actions/workflows/ci.yml) [![Trivy](https://github.com/yarilomail/yarilo-autoconfig/actions/workflows/trivy.yml/badge.svg)](https://github.com/yarilomail/yarilo-autoconfig/actions/workflows/trivy.yml) [![Go 1.26](https://img.shields.io/badge/Go-1.26-00ADD8?logo=go&logoColor=white)](https://go.dev/) [![Docker Hub](https://img.shields.io/badge/docker.io-0kaba0%2Fyarilo--autoconfig-blue?logo=docker)](https://hub.docker.com/r/0kaba0/yarilo-autoconfig) [![License: AGPL v3](https://img.shields.io/badge/license-AGPLv3-blue.svg)](LICENSE)
+
+The service tells a mail client which hosts and ports to use for an address:
 
 - **Thunderbird** (desktop and Android), FairEmail: autoconfig XML, format 1.1;
 - **Outlook** (classic, Windows): POX Autodiscover.
