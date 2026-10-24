@@ -72,9 +72,9 @@ func poxBody(addr, schema string) string {
 }
 
 func TestAutoconfigGolden(t *testing.T) {
-	pop3Implicit := testConfig()
-	pop3Implicit.POP3Host = "pop.example.net"
-	pop3Implicit.SMTPStartTLSPort = 0
+	pop3StartTLS := testConfig()
+	pop3StartTLS.POP3Host = "pop.example.net"
+	pop3StartTLS.SMTPImplicitTLSPort = 0
 
 	tests := []struct {
 		name, target string
@@ -82,7 +82,7 @@ func TestAutoconfigGolden(t *testing.T) {
 	}{
 		{"autoconfig_with_address", "/mail/config-v1.1.xml?emailaddress=alice%40Customer.Example", testConfig()},
 		{"autoconfig_without_address", "/.well-known/autoconfig/mail/config-v1.1.xml", testConfig()},
-		{"autoconfig_pop3_implicit_tls_only", "/mail/config-v1.1.xml?emailaddress=bob%40customer.example", pop3Implicit},
+		{"autoconfig_pop3_starttls_only", "/mail/config-v1.1.xml?emailaddress=bob%40customer.example", pop3StartTLS},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -117,9 +117,9 @@ func TestAutoconfigRejects(t *testing.T) {
 }
 
 func TestAutodiscoverGolden(t *testing.T) {
-	implicitTLS := testConfig()
-	implicitTLS.SMTPStartTLSPort = 0
-	implicitTLS.POP3Host = "pop.example.net"
+	startTLS := testConfig()
+	startTLS.SMTPImplicitTLSPort = 0
+	startTLS.POP3Host = "pop.example.net"
 
 	tests := []struct {
 		name, path, body string
@@ -127,7 +127,7 @@ func TestAutodiscoverGolden(t *testing.T) {
 	}{
 		{"autodiscover_settings", "/autodiscover/autodiscover.xml", poxBody("alice@customer.example", nsOutlook), testConfig()},
 		{"autodiscover_settings", "/Autodiscover/Autodiscover.xml", poxBody("alice@customer.example", nsOutlook), testConfig()},
-		{"autodiscover_implicit_tls_pop3", "/autodiscover/autodiscover.xml", poxBody("bob@customer.example", nsOutlook), implicitTLS},
+		{"autodiscover_starttls_pop3", "/autodiscover/autodiscover.xml", poxBody("bob@customer.example", nsOutlook), startTLS},
 		{"autodiscover_escaped", "/autodiscover/autodiscover.xml", poxBody("o'brien&amp;co@customer.example", nsOutlook), testConfig()},
 		{"autodiscover_error", "/autodiscover/autodiscover.xml",
 			poxBody("alice@customer.example", "http://schemas.microsoft.com/exchange/autodiscover/mobilesync/responseschema/2006"), testConfig()},
