@@ -66,7 +66,7 @@ its numbers equal the defaults above, and a test keeps them equal.
 |:---|:---|:---|
 | `image.repository` | `ghcr.io/yarilomail/yarilo-autoconfig` | |
 | `image.tag` | empty | empty = the chart's `appVersion` |
-| `imagePullSecrets` | `[]` | the GHCR package is private |
+| `imagePullSecrets` | `[]` | for a private registry mirror |
 | `replicaCount` | `2` | |
 | `config.*` | see above | `imap_host` and `smtp_host` are required: the chart does not render without them |
 | `logLevel` | empty | `LOG_LEVEL` |
