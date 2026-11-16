@@ -8,6 +8,7 @@ import (
 	"encoding/xml"
 	"log/slog"
 	"net/http"
+	"net/netip"
 	"strconv"
 	"strings"
 	"time"
@@ -28,6 +29,7 @@ type server struct {
 	cfg      Config
 	now      func() time.Time
 	requests *prometheus.CounterVec
+	trusted  []netip.Prefix
 }
 
 func newServer(cfg Config, reg prometheus.Registerer) *server {
@@ -40,12 +42,47 @@ func newServer(cfg Config, reg prometheus.Registerer) *server {
 		}, []string{"endpoint", "status"}),
 	}
 	reg.MustRegister(s.requests)
+	// LoadConfig has refused a TRUSTED_PROXIES that does not parse.
+	s.trusted, _ = parseTrusted(cfg.TrustedProxies)
 	return s
 }
 
-// ServeHTTP routes by lower-cased path: Outlook sends both
-// /autodiscover/autodiscover.xml and /Autodiscover/Autodiscover.xml.
+// statusWriter keeps the status the handler answered with.
+type statusWriter struct {
+	http.ResponseWriter
+	status int
+}
+
+func (w *statusWriter) WriteHeader(code int) {
+	if w.status == 0 {
+		w.status = code
+	}
+	w.ResponseWriter.WriteHeader(code)
+}
+
+func (w *statusWriter) Write(b []byte) (int, error) {
+	if w.status == 0 {
+		w.status = http.StatusOK
+	}
+	return w.ResponseWriter.Write(b)
+}
+
+// ServeHTTP answers and logs one line per request: the client address, the
+// method, the path without its query (it may hold the mail address) and the
+// status.
 func (s *server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	sw := &statusWriter{ResponseWriter: w}
+	s.route(sw, r)
+	if sw.status == 0 {
+		sw.status = http.StatusOK
+	}
+	slog.Info("request", "client", clientAddr(r, s.trusted, s.cfg.ForwardedHeader),
+		"method", r.Method, "path", r.URL.Path, "status", sw.status)
+}
+
+// route answers by lower-cased path: Outlook sends both
+// /autodiscover/autodiscover.xml and /Autodiscover/Autodiscover.xml.
+func (s *server) route(w http.ResponseWriter, r *http.Request) {
 	// A browser must never sniff an XML answer into HTML.
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	switch strings.ToLower(r.URL.Path) {

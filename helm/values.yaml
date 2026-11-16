@@ -22,8 +22,15 @@ config:
   pop3_port: 995
   dav_url: ""                   # empty: /.well-known/caldav|carddav answer 404
   jmap_url: ""                  # empty: /.well-known/jmap answers 404
+  # Proxies whose forwarded header names the client: CIDR ranges or addresses,
+  # comma-separated. Empty: no header is trusted, the TCP peer is the client.
+  trusted_proxies: ""
+  # The header those proxies maintain: x-forwarded-for or forwarded (RFC 7239).
+  # The other one passes through them as the client wrote it and is not read.
+  forwarded_header: "x-forwarded-for"
 
-# "debug" logs each answered request with its domain.
+# Each answered request is logged with its client address, method, path and
+# status; "debug" also logs the domain asked about.
 logLevel: ""
 
 httpPort: 8080
