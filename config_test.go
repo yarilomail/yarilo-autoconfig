@@ -48,6 +48,8 @@ func TestLoadConfigOverrides(t *testing.T) {
 		"DISPLAY_NAME":           "Example",
 		"LISTEN_ADDR":            ":9000",
 		"METRICS_ADDR":           ":9001",
+		"TRUSTED_PROXIES":        "10.42.0.0/24, fd42::/64",
+		"FORWARDED_HEADER":       "Forwarded",
 	}))
 	if err != nil {
 		t.Fatal(err)
@@ -58,6 +60,7 @@ func TestLoadConfigOverrides(t *testing.T) {
 		SMTPHost: "smtp.example.net", SMTPImplicitTLSPort: 0, SMTPStartTLSPort: 2587,
 		POP3Host: "pop.example.net", POP3Port: 1995,
 		DAVURL: "https://dav.example.net/", JMAPURL: "https://jmap.example.net/.well-known/jmap",
+		TrustedProxies: "10.42.0.0/24, fd42::/64", ForwardedHeader: "forwarded",
 	}
 	if c != want {
 		t.Errorf("got %+v\nwant %+v", c, want)
@@ -83,6 +86,9 @@ func TestLoadConfigRefuses(t *testing.T) {
 		{"pop3 port zero", map[string]string{"POP3_HOST": "pop.example.net", "POP3_PORT": "0"}, "POP3_PORT: 0"},
 		{"dav plain http", map[string]string{"DAV_URL": "http://dav.example.net/"}, "DAV_URL"},
 		{"jmap no host", map[string]string{"JMAP_URL": "https:///jmap"}, "JMAP_URL"},
+		{"trusted proxy not an address", map[string]string{"TRUSTED_PROXIES": "10.42.0.0/24 traefik"}, "TRUSTED_PROXIES"},
+		{"trusted proxy bad prefix", map[string]string{"TRUSTED_PROXIES": "10.42.0.0/33"}, "TRUSTED_PROXIES"},
+		{"forwarded header unknown", map[string]string{"FORWARDED_HEADER": "x-real-ip"}, "FORWARDED_HEADER"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -142,7 +148,7 @@ func TestValuesMatchDefaults(t *testing.T) {
 	}
 	known := map[string]bool{"DISPLAY_NAME": true, "IMAP_HOST": true, "IMAP_PORT": true, "SMTP_HOST": true,
 		"SMTP_IMPLICIT_TLS_PORT": true, "SMTP_STARTTLS_PORT": true, "POP3_HOST": true, "POP3_PORT": true,
-		"DAV_URL": true, "JMAP_URL": true}
+		"DAV_URL": true, "JMAP_URL": true, "TRUSTED_PROXIES": true, "FORWARDED_HEADER": true}
 	for k := range kv {
 		if !known[k] {
 			t.Errorf("values.yaml config.%s is not read by LoadConfig", strings.ToLower(k))

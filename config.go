@@ -25,6 +25,9 @@ type Config struct {
 	POP3Port            int
 	DAVURL              string
 	JMAPURL             string
+	// TrustedProxies is TRUSTED_PROXIES as written; the server parses it.
+	TrustedProxies  string
+	ForwardedHeader string
 }
 
 // Defaults returns the values used for every variable that is not set.
@@ -38,6 +41,7 @@ func Defaults() Config {
 		SMTPImplicitTLSPort: 465,
 		SMTPStartTLSPort:    587,
 		POP3Port:            995,
+		ForwardedHeader:     headerXFF,
 	}
 }
 
@@ -74,6 +78,9 @@ func LoadConfig(getenv func(string) string) (Config, error) {
 	num(&c.POP3Port, "POP3_PORT")
 	str(&c.DAVURL, "DAV_URL")
 	str(&c.JMAPURL, "JMAP_URL")
+	str(&c.TrustedProxies, "TRUSTED_PROXIES")
+	str(&c.ForwardedHeader, "FORWARDED_HEADER")
+	c.ForwardedHeader = strings.ToLower(c.ForwardedHeader)
 
 	if c.DisplayName == "" {
 		errs = append(errs, "DISPLAY_NAME: empty")
@@ -102,6 +109,12 @@ func LoadConfig(getenv func(string) string) (Config, error) {
 		if u.val != "" && !validHTTPSURL(u.val) {
 			errs = append(errs, fmt.Sprintf("%s: not an https URL: %q", u.key, u.val))
 		}
+	}
+	if _, err := parseTrusted(c.TrustedProxies); err != nil {
+		errs = append(errs, "TRUSTED_PROXIES: "+err.Error())
+	}
+	if c.ForwardedHeader != headerXFF && c.ForwardedHeader != headerForwarded {
+		errs = append(errs, fmt.Sprintf("FORWARDED_HEADER: %q: x-forwarded-for or forwarded", c.ForwardedHeader))
 	}
 	if len(errs) > 0 {
 		return Config{}, fmt.Errorf("config: %s", strings.Join(errs, "; "))

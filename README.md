@@ -11,7 +11,7 @@ Mail client autoconfiguration for [yarilo](https://github.com/yarilomail/yarilo)
 </td>
 </tr></table>
 
-[![CI](https://github.com/yarilomail/yarilo-autoconfig/actions/workflows/ci.yml/badge.svg)](https://github.com/yarilomail/yarilo-autoconfig/actions/workflows/ci.yml) [![Trivy](https://github.com/yarilomail/yarilo-autoconfig/actions/workflows/trivy.yml/badge.svg)](https://github.com/yarilomail/yarilo-autoconfig/actions/workflows/trivy.yml) [![Go 1.26](https://img.shields.io/badge/Go-1.26-00ADD8?logo=go&logoColor=white)](https://go.dev/) [![Docker Hub](https://img.shields.io/badge/docker.io-0kaba0%2Fyarilo--autoconfig-blue?logo=docker)](https://hub.docker.com/r/0kaba0/yarilo-autoconfig) [![License: AGPL v3](https://img.shields.io/badge/license-AGPLv3-blue.svg)](LICENSE)
+[![CI](https://github.com/yarilomail/yarilo-autoconfig/actions/workflows/ci.yml/badge.svg)](https://github.com/yarilomail/yarilo-autoconfig/actions/workflows/ci.yml) [![Trivy](https://github.com/yarilomail/yarilo-autoconfig/actions/workflows/trivy.yml/badge.svg)](https://github.com/yarilomail/yarilo-autoconfig/actions/workflows/trivy.yml) [![Go 1.27](https://img.shields.io/badge/Go-1.27-00ADD8?logo=go&logoColor=white)](https://go.dev/) [![Docker Hub](https://img.shields.io/badge/docker.io-0kaba0%2Fyarilo--autoconfig-blue?logo=docker)](https://hub.docker.com/r/0kaba0/yarilo-autoconfig) [![License: AGPL v3](https://img.shields.io/badge/license-AGPLv3-blue.svg)](LICENSE)
 
 The service tells a mail client which hosts and ports to use for an address:
 
@@ -61,9 +61,28 @@ Environment variables. An empty variable keeps its default.
 | `JMAP_URL` | empty | `https` URL for the `.well-known/jmap` redirect |
 | `LISTEN_ADDR` | `:8080` | client-facing listener |
 | `METRICS_ADDR` | `:8081` | health and metrics listener |
-| `LOG_LEVEL` | empty | `debug` logs each answered request with its domain (never the address) |
+| `TRUSTED_PROXIES` | empty | CIDR ranges or addresses, comma-separated, of the proxies whose forwarded header names the client; empty trusts no header |
+| `FORWARDED_HEADER` | `x-forwarded-for` | the header those proxies maintain: `x-forwarded-for` or `forwarded` (RFC 7239) |
+| `LOG_LEVEL` | empty | `debug` also logs the domain each request asks about (never the mail address) |
 
 An invalid value stops the service at start with every problem listed.
+
+## Request log
+
+Each answered request is one JSON line, `msg` `request`, with `client`,
+`method`, `path` and `status`. The path is logged without its query, which
+may hold the mail address.
+
+`client` is the TCP peer, unless the peer is in `TRUSTED_PROXIES`. Then the
+chain in `FORWARDED_HEADER` is walked from the right, past every hop that is
+also trusted, and the first hop that is not is the client. A client cannot
+name its own address: what it writes sits left of the hops the trusted
+proxies added. A hop that does not parse ends the walk at the last address
+known. Only the configured header is read: the other passes through the
+proxies as the client wrote it.
+
+Behind Cloudflare and Traefik, list Traefik's pod ranges and Cloudflare's
+published ranges, and keep `x-forwarded-for`.
 
 Implicit TLS is offered before STARTTLS (RFC 8314 §4). Outlook takes one SMTP
 entry: implicit TLS when it is on, otherwise STARTTLS. Thunderbird gets both,
