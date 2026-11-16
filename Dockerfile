@@ -1,5 +1,5 @@
 # Bases pinned by digest, the same as the yarilo image; dependabot moves them.
-FROM golang:1.26.10-alpine@sha256:27f2d3b83cfc5803c8078f8e730af0f7c431bf067afaec8f60a36fb763187cba AS builder
+FROM golang:1.27.4-alpine3.24@sha256:0a5f7fe796599ff487605987432e7619ae45beeb2fba4c2ce0b907879932aebf AS builder
 
 # A newer go.mod must fail the build, not fetch a toolchain.
 ENV GOTOOLCHAIN=local
@@ -12,7 +12,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
     -ldflags="-s -w -X main.version=${BUILD_VERSION}" -trimpath \
     -o /out/yarilo-autoconfig .
 
-FROM alpine:3.24@sha256:be2656061b536c1883c4034790e21d0a09c5aaaf51968b89368a3c0371ea2c9a
+FROM alpine:3.24@sha256:f59abe656b692d901e184be3445e084786602108599d2a51d229c0f5a48c71bf
 # Upgrade at build time so a rebuild picks up fixed packages under the same tag.
 # hadolint ignore=DL3018,DL3019
 RUN apk upgrade --no-cache && adduser -D -H -u 65532 autoconfig

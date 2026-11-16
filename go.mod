@@ -1,10 +1,10 @@
 module github.com/yarilomail/yarilo-autoconfig
 
-go 1.26.10
+go 1.27.4
 
 require (
 	github.com/prometheus/client_golang v1.25.0
-	go.yaml.in/yaml/v3 v3.0.5
+	go.yaml.in/yaml/v3 v3.0.6
 )
 
 require (

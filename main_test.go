@@ -6,6 +6,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"flag"
 	"net/http"
 	"net/http/httptest"
@@ -37,7 +38,7 @@ func newTestServer(t *testing.T, c Config) *server {
 }
 
 func do(s *server, method, target, body string) *httptest.ResponseRecorder {
-	req := httptest.NewRequest(method, target, strings.NewReader(body))
+	req := httptest.NewRequestWithContext(context.Background(), method, target, strings.NewReader(body))
 	rec := httptest.NewRecorder()
 	s.ServeHTTP(rec, req)
 	return rec
@@ -211,13 +212,13 @@ func TestOpsHandler(t *testing.T) {
 	h := opsHandler(reg)
 	for _, path := range []string{"/healthz", "/readyz"} {
 		rec := httptest.NewRecorder()
-		h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, path, nil))
+		h.ServeHTTP(rec, httptest.NewRequestWithContext(t.Context(), http.MethodGet, path, nil))
 		if rec.Code != http.StatusOK {
 			t.Errorf("%s: status %d", path, rec.Code)
 		}
 	}
 	rec := httptest.NewRecorder()
-	h.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/metrics", nil))
+	h.ServeHTTP(rec, httptest.NewRequestWithContext(t.Context(), http.MethodGet, "/metrics", nil))
 	if !strings.Contains(rec.Body.String(), `autoconfig_requests_total{endpoint="autoconfig",status="200"} 1`) {
 		t.Errorf("/metrics lacks the request counter:\n%s", rec.Body.String())
 	}
